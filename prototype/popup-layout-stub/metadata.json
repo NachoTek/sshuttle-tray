@@ -1,0 +1,20 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "sshuttle-tray wayfinder prototype"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "THROWAWAY popup-layout prototype for the office-tunnel tray tool. Not the real plasmoid.",
+        "Icon": "network-vpn",
+        "Id": "org.nachotek.sshuttletray.proto",
+        "License": "MIT",
+        "Name": "sshuttle-tray PROTOTYPE",
+        "Version": "0.0.1"
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-NotificationArea": true,
+    "X-Plasma-NotificationAreaCategory": "SystemServices"
+}
