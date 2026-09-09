@@ -44,7 +44,7 @@ ColumnLayout {
             model: [
                 { label: "State", value: brain.stateWord, mono: false },
                 { label: "Gateway", value: brain.noAnswer ? "no answer" : (brain.gatewayIP || "…"), mono: true },
-                { label: "Baseline", value: brain.baseline || "—", mono: true },
+                { label: "Baseline", value: brain.baselineIP || "—", mono: true },
                 { label: "Samples", value: brain.ticksUsed + "/" + brain.tickCap + (brain.stale ? " · stale" : ""), mono: false }
             ]
             RowLayout {

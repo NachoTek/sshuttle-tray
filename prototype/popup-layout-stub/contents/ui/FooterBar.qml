@@ -78,7 +78,7 @@ Rectangle {
             text: "state " + brain.state + " · suspect " + Math.round(brain.suspectSeconds) + "s"
                   + " · ticks " + brain.ticksUsed + "/" + brain.tickCap
                   + " · noans " + brain.noAnswerCount
-                  + " · baseline " + (brain.baseline || "—")
+                  + " · baseline " + (brain.baselineIP || "—")
                   + " · " + brain.lastAction
         }
     }

@@ -1,5 +1,4 @@
 import QtQuick
-import org.kde.plasma.plasmoid
 import org.kde.kirigami as Kirigami
 
 MouseArea {
@@ -7,7 +6,7 @@ MouseArea {
     property var brain
 
     hoverEnabled: true
-    onClicked: Plasmoid.expanded = !Plasmoid.expanded
+    onClicked: brain.expanded = !brain.expanded
 
     readonly property color stateColor: {
         if (brain.state === "off") return Kirigami.Theme.disabledTextColor

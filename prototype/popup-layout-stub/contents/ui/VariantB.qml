@@ -36,7 +36,7 @@ ColumnLayout {
             PC3.Label {
                 font.family: "monospace"
                 color: "#8a8d98"
-                text: "baseline  " + (brain.baseline || "—")
+                text: "baseline  " + (brain.baselineIP || "—")
             }
             PC3.Label {
                 font.family: "monospace"

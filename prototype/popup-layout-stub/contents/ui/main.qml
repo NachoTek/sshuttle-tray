@@ -2,28 +2,24 @@ import QtQuick
 import org.kde.plasma.plasmoid
 import org.kde.plasma.plasma5support as Plasma5Support
 
-Item {
+PlasmoidItem {
     id: root
 
     Plasmoid.icon: "network-vpn"
-    Plasmoid.toolTipMainText: {
+    toolTipMainText: {
         if (state === "off") return "office-tunnel: off"
         if (state === "starting") return "office-tunnel: starting"
         if (state === "alert") return "office-tunnel: alert"
         return "office-tunnel: on"
     }
-    Plasmoid.toolTipSubText: {
+    toolTipSubText: {
         if (!haveSample) return "Gateway IP not sampled yet"
         if (noAnswer) return "Echo endpoints not answering"
         return "Gateway " + gatewayIP + (stale ? " (stale)" : "")
     }
 
-    Plasmoid.compactRepresentation: Component {
-        CompactRepresentation { brain: root }
-    }
-    Plasmoid.fullRepresentation: Component {
-        Popup { brain: root }
-    }
+    compactRepresentation: CompactRepresentation { brain: root }
+    fullRepresentation: Popup { brain: root }
 
     property bool sim: true
     property bool simPaused: false
@@ -32,7 +28,7 @@ Item {
 
     property string svcState: "inactive"
     property string gatewayIP: ""
-    property string baseline: ""
+    property string baselineIP: ""
     property bool haveSample: false
     property bool noAnswer: false
     property string evidence: "none"
@@ -92,8 +88,8 @@ Item {
         if (state === "off") return "Tunnel is off"
         if (svcState === "activating") return "Starting…"
         if (state === "on") return "Traffic routed through the tunnel"
-        if (baseline === "") return "Verifying — no baseline captured"
-        if (suspectSeconds >= 30) return evidence === "baseline"
+        if (baselineIP === "") return "Verifying — no baseline captured"
+        if (suspectSeconds >= 30) return evidence === "baselineIP"
             ? "Traffic reverted to baseline — tunnel dead or bypassed"
             : "Tunnel never became effective"
         return "Verifying traffic… " + Math.max(0, Math.ceil(30 - suspectSeconds)) + "s"
@@ -142,7 +138,7 @@ Item {
             if (i > 0) map[line.slice(0, i)] = line.slice(i + 1)
         }
         svcState = map["ActiveState"] || "inactive"
-        if (svcState === "inactive" && haveSample && !noAnswer && baseline !== gatewayIP) baseline = gatewayIP
+        if (svcState === "inactive" && haveSample && !noAnswer && baselineIP !== gatewayIP) baselineIP = gatewayIP
     }
 
     function validIPv4(s) {
@@ -153,7 +149,7 @@ Item {
         gatewayIP = ip
         haveSample = true
         noAnswer = false
-        if (baseline !== "") evidence = ip === baseline ? "baseline" : "routed"
+        if (baselineIP !== "") evidence = ip === baselineIP ? "baselineIP" : "routed"
         else evidence = "none"
     }
 
@@ -179,7 +175,7 @@ Item {
             acc += p.dur
         }
         const local = t - phaseStart
-        baseline = simHomeIP
+        baselineIP = simHomeIP
         svcState = phase.svc
         if (phase.noAns) {
             noAnswer = true
@@ -187,7 +183,7 @@ Item {
             noAnswer = false
             gatewayIP = phase.ip
             haveSample = true
-            evidence = phase.ip === baseline ? "baseline" : "routed"
+            evidence = phase.ip === baselineIP ? "baselineIP" : "routed"
         }
         if (phase.name === "verifying" || phase.name === "revert-grace" || phase.name === "alert") suspectSeconds = local
         else suspectSeconds = 0
@@ -262,7 +258,7 @@ Item {
         } else {
             svcState = ""
             gatewayIP = ""
-            baseline = ""
+            baselineIP = ""
             haveSample = false
             noAnswer = false
             evidence = "none"
@@ -293,18 +289,8 @@ Item {
     }
     Timer {
         interval: 5000
-        running: !root.sim && plasmoidExpandedWatcher.expanded && !root.stale
+        running: !root.sim && root.expanded && !root.stale
         repeat: true
         onTriggered: root.sampleRound()
-    }
-
-    Connections {
-        id: plasmoidExpandedWatcher
-        target: Plasmoid
-        property bool expanded: false
-        function onExpandedChanged() {
-            expanded = Plasmoid.expanded
-            if (Plasmoid.expanded) root.openedPopup()
-        }
     }
 }
