@@ -115,6 +115,32 @@ Behaviour notes:
 - A hand-rolled `/etc/systemd/system/sshuttle-tray-tunnel.service` would
   silently shadow the packaged unit — the fixed name is deliberate (ADR 0005).
 
+### Tie the Tunnel to your login (optional)
+
+By default the Tunnel keeps running after you log out — it is a system unit,
+owned by the Tool, not by your session. If the Tunnel should instead come
+down when you log out, bind it to your user manager with an `/etc` drop-in:
+
+```sh
+sudo mkdir -p /etc/systemd/system/sshuttle-tray-tunnel.service.d
+printf '[Unit]\nBindsTo=user@%s.service\nAfter=user@%s.service\n' "$(id -u)" "$(id -u)" \
+  | sudo tee /etc/systemd/system/sshuttle-tray-tunnel.service.d/50-session-bind.conf
+sudo systemctl daemon-reload
+```
+
+`user@<uid>.service` is the systemd **user manager** for your uid; systemd
+stops it when your last session ends, and `BindsTo=` takes the Tunnel down
+with it. Notes:
+
+- The uid can't ship in a generic package, which is why this is a per-install
+  opt-in rather than the default (ADR 0001 amendment).
+- It binds to **logout**, not to plasmashell: the Tunnel still survives
+  plasmashell restarts and session switches (any session of that uid keeps
+  the user manager alive).
+- It is inert if lingering is enabled for your user — check with
+  `loginctl show-user "$USER" -p Linger`; with `Linger=yes` the user manager
+  never stops, so the binding never fires.
+
 ## Migrating from a hand-rolled `office-tunnel.service`
 
 Mechanical cut-over:

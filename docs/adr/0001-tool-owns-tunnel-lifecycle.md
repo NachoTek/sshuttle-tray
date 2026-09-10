@@ -14,3 +14,6 @@
 - Don't "fix" the unit by re-adding `Restart=on-failure`: that removal is deliberate (see [the lifecycle ticket](https://github.com/NachoTek/sshuttle-tray/issues/4)).
 
 > Amended with the packaging decision ([ADR 0005](0005-github-tarball-distribution-generic-unit.md)): the drop-in targets the generic `sshuttle-tray-tunnel.service`, superseding the `office-tunnel` naming in this ADR's narration.
+
+> Amended 2026-09-10 — logout binding is the user's call, opt-in per install. The original stance ("survives restarts") holds against *process* lifetime (plasmashell crashes), but the Tunnel should not outlive the user's *login*: an office machine nobody is logged into should not keep routing through the relay. Rejected alternatives: a `--user` unit (sshuttle needs root on the client regardless — it would just wrap sudo), and PAM/session-teeardown hooks (racy polkit `subject.active` at teardown, invasive packaging). Chosen: an `/etc` drop-in binding the system Tunnel to the user manager — `BindsTo=user@<uid>.service` + `After=` — which stops the Tunnel cleanly when the last session of that uid ends. Opt-in because the uid cannot ship in a generic package; inert when `loginctl enable-linger` keeps the user manager alive. See the README ("Tie the Tunnel to your login").
+
