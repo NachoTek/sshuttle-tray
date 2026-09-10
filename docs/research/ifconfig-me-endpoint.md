@@ -21,7 +21,7 @@ All facts below verified live on 2026-09-09 (curl, IPv4-forced, from the dev mac
 | Format | `text/plain`, `<IPv4>\n` (13 bytes) — verified |
 | Endpoints | `/` (=`/ip`), `/ip`, `/ua`, `/all`, `/all.json` etc. — [homepage](https://ifconfig.me/) self-documents the CLI |
 | Transport | HTTP/2 + HTTP/3 (`alt-svc: h3`) over TLS; cleartext `http://` also answers 200 (no forced redirect) — verified |
-| Infrastructure | Google Front End (`via: 1.1 google`, A `192.0.2.53`, AAAA `2001:db8::b2bd`) — verified via headers/DNS |
+| Infrastructure | Google Front End (`via: 1.1 google`, A/AAAA records inside Google Front End ranges — address literals elided per the no-leak policy, ADR 0005) — verified via headers/DNS |
 | Latency (untunneled, 3 samples) | total 127–128 ms; connect 28–31 ms; TLS 67–70 ms — measured |
 | Rate limit | **None published.** Site carries no ToS/rate-limit page; no rate-limit headers observed. Treat as a goodwill service; homepage now advertises an IPinfo.io partnership |
 | Caching | No `Cache-Control` sent — effectively uncacheable per-request; nothing to work around |
