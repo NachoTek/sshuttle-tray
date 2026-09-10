@@ -52,7 +52,6 @@ PlasmoidItem {
     property bool liveControl: false
 
     property string relayIP: "office-tunnel"
-    property string ispGateway: "192.0.2.254"
 
     readonly property string simHomeIP: "192.0.2.10"
     readonly property string simTunnelIP: "198.51.100.20"
@@ -113,11 +112,7 @@ PlasmoidItem {
             else if (lastTag === "ip2") handleIp(out, false)
             else if (lastTag === "relay") {
                 const m = out.match(/^hostname (\S+)$/m)
-                if (m) relayIP = "office-tunnel · " + m[1]
-            }
-            else if (lastTag === "ispgw") {
-                const g = out.match(/default via (\S+)/)
-                if (g) ispGateway = g[1]
+                if (m) relayIP = m[1]
             }
             else if (lastTag === "ctl") refreshService()
             lastTag = ""
@@ -285,15 +280,7 @@ PlasmoidItem {
     Timer {
         id: metaStagger
         interval: 600
-        onTriggered: {
-            root.runCommand("ssh -G office-tunnel", "relay")
-            ispgwStagger.restart()
-        }
-    }
-    Timer {
-        id: ispgwStagger
-        interval: 600
-        onTriggered: root.runCommand("ip route show default", "ispgw")
+        onTriggered: root.runCommand("ssh -G office-tunnel", "relay")
     }
 
     function cycleVariant(dir) {

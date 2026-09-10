@@ -200,21 +200,27 @@ Rectangle {
                     RowLayout {
                         spacing: 6
                         PC3.Label {
-                            text: brain.ispGateway
-                            color: va.cMuted
+                            text: brain.noAnswer ? "no answer" : (brain.gatewayIP || "…")
+                            color: brain.noAnswer || brain.stale ? va.cMuted : va.cText
+                            opacity: brain.stale ? 0.55 : 1
                             font.family: "monospace"
                             font.pixelSize: 12
+                            font.bold: true
                         }
                         Rectangle {
                             radius: 4
                             implicitHeight: localChip.implicitHeight + 4
                             implicitWidth: localChip.implicitWidth + 8
-                            color: brain.state === "on" ? Qt.rgba(0, 229/255, 1, 0.12) : "#21262D"
+                            color: {
+                                if (brain.noAnswer) return "#21262D"
+                                if (brain.stale) return Qt.rgba(219/255,171/255,10/255,0.15)
+                                return brain.haveSample ? Qt.rgba(0, 229/255, 1, 0.12) : "#21262D"
+                            }
                             PC3.Label {
                                 id: localChip
                                 anchors.centerIn: parent
-                                text: brain.state === "on" ? "DIRECT" : "DEFAULT"
-                                color: brain.state === "on" ? "#00E5FF" : va.cMuted
+                                text: brain.noAnswer ? "NO ANS" : (brain.haveSample ? (brain.stale ? "STALE" : "LIVE") : "…")
+                                color: brain.noAnswer ? va.cMuted : (brain.stale ? "#F2CC60" : "#00E5FF")
                                 font.pixelSize: 9
                                 font.bold: true
                             }
