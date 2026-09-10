@@ -14,7 +14,10 @@ EnvironmentFile=/etc/sshuttle-tray/tunnel.env
 # Route Set, written by the apply unit or by hand (optional; overrides the fallback)
 EnvironmentFile=-/etc/sshuttle-tray/route-set.env
 # $SSHUTTLE_SUBNETS unbraced on purpose: systemd word-splits it into one argv per CIDR.
-ExecStart=/usr/bin/sshuttle --verbose --remote ${SSHUTTLE_REMOTE} --ssh-cmd ${SSHUTTLE_REMOTE_SHELL} $SSHUTTLE_SUBNETS
+# SSHUTTLE_REMOTE_SHELL feeds sshuttle's --remote-shell: the shell the RELAY runs
+# the bootstrap in — `cmd` or `powershell` for a Windows relay, empty/`posix` for
+# Linux. sshuttle's default ssh client is used to connect.
+ExecStart=/usr/bin/sshuttle --verbose --remote ${SSHUTTLE_REMOTE} --remote-shell ${SSHUTTLE_REMOTE_SHELL} $SSHUTTLE_SUBNETS
 # Generous start timeout: sshuttle notifies once the firewall rules are up;
 # slow relays and roaming handshakes need the slack.
 TimeoutStartSec=90s

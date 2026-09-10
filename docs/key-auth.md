@@ -101,16 +101,11 @@ Then deploy the key — the location depends on the account:
   icacls "C:\ProgramData\ssh\administrators_authorized_keys" /inheritance:r /grant "SYSTEM:F" /grant "BUILTIN\Administrators:F"
   ```
 
-Caveat, stated honestly: sshuttle's supported target is a unix relay. A
-Windows relay with `cmd.exe` as the OpenSSH default shell can mangle the
-quoting of sshuttle's python bootstrap. If key auth verifies (next section)
-but the Tunnel then dies with a python/stager error, switch the default shell
-to PowerShell:
-
-```powershell
-New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell `
-  -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
-```
+Windows relay note: sshuttle boots its python helper through the relay's
+default shell, and the syntax differs per shell — declare which one you're
+running in `tunnel.env` with `SSHUTTLE_REMOTE_SHELL=cmd` (or `powershell`);
+Linux relays use `posix`. Either way the relay needs `python` reachable in
+PATH for SSH sessions.
 
 ## 4. Verify non-interactively, as root, before wiring the unit
 
@@ -130,7 +125,7 @@ alias and use a bare `user@host`.
 
 ```ini
 SSHUTTLE_REMOTE=relay.example     # or me@192.0.2.10:22
-SSHUTTLE_REMOTE_SHELL=ssh         # the ssh binary ON THIS MACHINE — not the relay's shell
+SSHUTTLE_REMOTE_SHELL=posix       # the relay's bootstrap shell: `cmd`/`powershell` (Windows relay), `posix` (Linux)
 ```
 
 Then start the Tunnel once from a terminal where you can watch it:
@@ -148,9 +143,9 @@ Gateway different from the captured Baseline).
 
 | Symptom | Likely cause |
 |---|---|
-| `Failed to find '<word>' in path …` | `SSHUTTLE_REMOTE_SHELL` isn't a real ssh binary on this machine (e.g. `cmd`) — set it to `ssh` |
+| `'P' is not recognized as an internal or external command` (from the relay) | sshuttle sent its POSIX bootstrap into a Windows relay not declared as such — set `SSHUTTLE_REMOTE_SHELL=cmd` (or `powershell`) in `tunnel.env` so the unit passes `--remote-shell` |
 | ssh falls through to a password prompt; `ssh -vvv` shows only default identities and **no `Offering public key` line** | root's `/root/.ssh/config` is missing or its `Host` pattern doesn't match the address you connect to, so the custom-named key is never offered — recreate the step 2 config and check the `Host` line matches `SSHUTTLE_REMOTE` exactly |
 | Unit fails, journal shows `Permission denied (publickey)` | key not deployed for the account you connect as, wrong file/ACL on the relay, or root's config doesn't pick the key (`IdentityFile`/`IdentitiesOnly`) |
 | Key deploys but is refused from an *admin* account on a domain-joined Windows relay | AD-nested group membership can fail the sshd `Match Group administrators` check — put the key in the user-profile `authorized_keys` as well, and make sure the file isn't UTF-16 (`Format-Hex`, no `FF FE` lead-in) |
 | First start hangs then fails, journal mentions host key | host key never accepted for root — run the step 4 command once |
-| Key auth OK but Tunnel fails with a python error | relay has no `python3` in PATH (Linux), or Windows default-shell quoting (see above) |
+| Key auth OK but Tunnel fails with a python error | relay has no `python` reachable in PATH for SSH sessions — install Python on the relay (Windows: python.org or Microsoft Store, machine-wide PATH) |

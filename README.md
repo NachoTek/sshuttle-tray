@@ -81,7 +81,7 @@ sudo rm -rf /usr/share/plasma/plasmoids/io.github.nachotek.sshuttle-tray   # uni
 
 ```ini
 SSHUTTLE_REMOTE=relay.example     # the sshuttle -r: SSH alias or user@host[:port]
-SSHUTTLE_REMOTE_SHELL=ssh         # one word: the --ssh-cmd sshuttle runs
+SSHUTTLE_REMOTE_SHELL=posix       # --remote-shell: `cmd`/`powershell` on a Windows relay, `posix` on Linux
 ```
 
 The unit's ssh runs as root and non-interactively, so the relay must accept
