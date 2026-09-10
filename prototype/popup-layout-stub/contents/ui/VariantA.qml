@@ -3,16 +3,26 @@ import QtQuick.Layouts
 import org.kde.plasma.components as PC3
 import org.kde.kirigami as Kirigami
 
-ColumnLayout {
+Rectangle {
     id: va
     property var brain
-    spacing: Kirigami.Units.largeSpacing
 
-    readonly property color stateColor: {
-        if (brain.state === "off") return Kirigami.Theme.disabledTextColor
-        if (brain.state === "starting") return Kirigami.Theme.neutralTextColor
-        if (brain.state === "on") return Kirigami.Theme.positiveTextColor
-        return Kirigami.Theme.negativeTextColor
+    radius: Kirigami.Units.largeSpacing
+    color: "#161B22"
+    border.color: "#21262D"
+    border.width: 1
+    implicitHeight: content.implicitHeight + Kirigami.Units.largeSpacing * 2
+    Layout.fillWidth: true
+
+    readonly property color cText: "#F0F6FC"
+    readonly property color cMuted: "#8B949E"
+    readonly property color cCard: "#0D1117"
+    readonly property color cBorder: "#21262D"
+    readonly property color accent: {
+        if (brain.state === "on") return "#00E5FF"
+        if (brain.state === "starting") return "#DBAB0A"
+        if (brain.state === "alert") return "#F85149"
+        return "#484F58"
     }
     readonly property string glyph: {
         if (brain.state === "off") return "⏻"
@@ -20,82 +30,202 @@ ColumnLayout {
         if (brain.state === "on") return "✓"
         return "!"
     }
-
-    Rectangle {
-        Layout.alignment: Qt.AlignHCenter
-        implicitWidth: Kirigami.Units.gridUnit * 4
-        implicitHeight: implicitWidth
-        radius: width / 2
-        color: "transparent"
-        border.color: va.stateColor
-        border.width: 3
-        Text {
-            anchors.centerIn: parent
-            text: va.glyph
-            color: va.stateColor
-            font.pixelSize: parent.width * 0.45
-            font.bold: true
-        }
+    readonly property string headline: {
+        if (brain.state === "on") return "ON"
+        if (brain.state === "starting") return "CONNECTING"
+        if (brain.state === "alert") return "ALERT"
+        return "OFF"
     }
-
-    PC3.Label {
-        Layout.alignment: Qt.AlignHCenter
-        text: brain.state === "alert" ? "ALERT" : brain.stateWord
-        font.pointSize: Kirigami.Theme.defaultFont.pointSize + 6
-        font.bold: true
-        color: va.stateColor
+    readonly property string caption: {
+        if (brain.state === "on") return "Traffic routed through the tunnel"
+        if (brain.state === "off") return "Tunnel is off — click the ring to start"
+        return brain.stateCause
     }
-
-    PC3.Label {
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter
-        horizontalAlignment: Text.AlignHCenter
-        wrapMode: Text.Wrap
-        text: brain.stateCause
-        color: Kirigami.Theme.disabledTextColor
+    readonly property var pill: {
+        if (brain.noAnswer) return { text: "NO ANSWER", fill: Qt.rgba(110/255,118/255,129/255,0.15), fg: "#8B949E" }
+        if (brain.stale) return { text: "STALE", fill: Qt.rgba(219/255,171/255,10/255,0.15), fg: "#F2CC60" }
+        if (brain.state === "on") return { text: "PROTECTED", fill: Qt.rgba(46/255,160/255,67/255,0.15), fg: "#3FB950" }
+        if (brain.state === "starting") return { text: "ESTABLISHING", fill: Qt.rgba(219/255,171/255,10/255,0.15), fg: "#F2CC60" }
+        if (brain.state === "alert") return { text: "DEGRADED", fill: Qt.rgba(248/255,81/255,73/255,0.15), fg: "#FF7B72" }
+        return { text: "UNPROTECTED", fill: Qt.rgba(110/255,118/255,129/255,0.15), fg: "#8B949E" }
     }
 
     ColumnLayout {
-        spacing: 0
-        Layout.alignment: Qt.AlignHCenter
-        PC3.Label {
-            Layout.alignment: Qt.AlignHCenter
-            text: "GATEWAY IP"
-            font.pointSize: Kirigami.Theme.defaultFont.pointSize - 2
-            color: Kirigami.Theme.disabledTextColor
-        }
+        id: content
+        anchors.fill: parent
+        anchors.margins: Kirigami.Units.largeSpacing
+        spacing: Kirigami.Units.largeSpacing
+
         RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Kirigami.Units.smallSpacing
+            Layout.fillWidth: true
             PC3.Label {
-                text: brain.noAnswer ? "no answer" : (brain.gatewayIP || "…")
-                font.family: "monospace"
-                font.pointSize: Kirigami.Theme.defaultFont.pointSize + 3
-                color: brain.noAnswer ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                opacity: brain.stale ? 0.45 : 1
+                text: "office tunnel"
+                color: va.cMuted
+                font.pointSize: Kirigami.Theme.defaultFont.pointSize - 2
+                font.letterSpacing: 1
+            }
+            Item { Layout.fillWidth: true }
+            PC3.ToolButton {
+                implicitWidth: 20
+                implicitHeight: 20
+                icon.name: "configure"
+                PC3.ToolTip.text: "settings — not in prototype"
+                PC3.ToolTip.visible: hovered
+            }
+        }
+
+        Item {
+            Layout.alignment: Qt.AlignHCenter
+            implicitWidth: 84
+            implicitHeight: 84
+            MouseArea {
+                id: ringClick
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: brain.pressPower()
             }
             Rectangle {
-                visible: brain.haveSample
-                radius: height / 2
-                implicitHeight: pillText.implicitHeight + Kirigami.Units.smallSpacing
-                implicitWidth: pillText.implicitWidth + Kirigami.Units.largeSpacing
-                color: brain.stale ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.positiveTextColor
-                opacity: 0.25
-                PC3.Label {
-                    id: pillText
-                    anchors.centerIn: parent
-                    text: brain.stale ? "STALE" : "LIVE"
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize - 3
-                    color: brain.stale ? Kirigami.Theme.textColor : Kirigami.Theme.positiveTextColor
+                id: halo
+                anchors.centerIn: parent
+                width: 112
+                height: 112
+                radius: 56
+                color: va.accent
+                opacity: brain.state === "on" ? 0.18 : 0
+                Behavior on opacity { NumberAnimation { duration: 300 } }
+            }
+            Rectangle {
+                id: ring
+                anchors.fill: parent
+                radius: 42
+                color: "transparent"
+                border.color: va.accent
+                border.width: 3
+                SequentialAnimation on opacity {
+                    running: brain.state === "starting"
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 1; to: 0.35; duration: 550 }
+                    NumberAnimation { from: 0.35; to: 1; duration: 550 }
+                }
+            }
+            Text {
+                anchors.centerIn: parent
+                text: va.glyph
+                color: va.accent
+                font.pixelSize: 34
+                font.bold: true
+            }
+        }
+
+        PC3.Label {
+            Layout.alignment: Qt.AlignHCenter
+            text: va.headline
+            color: va.accent
+            font.pixelSize: 24
+            font.bold: true
+            font.letterSpacing: 1.2
+        }
+
+        PC3.Label {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+            text: va.caption
+            color: va.cMuted
+            font.pixelSize: 13
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: card.implicitHeight + Kirigami.Units.largeSpacing * 2
+            radius: Kirigami.Units.smallSpacing + 2
+            color: va.cCard
+            border.color: va.cBorder
+            border.width: 1
+            ColumnLayout {
+                id: card
+                anchors.fill: parent
+                anchors.margins: Kirigami.Units.largeSpacing
+                spacing: Kirigami.Units.smallSpacing
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    PC3.Label {
+                        text: "GATEWAY ROUTING"
+                        color: va.cMuted
+                        font.pixelSize: 12
+                        font.bold: true
+                        font.letterSpacing: 1
+                    }
+                    Item { Layout.fillWidth: true }
+                    Rectangle {
+                        radius: height / 2
+                        implicitHeight: pillText.implicitHeight + 6
+                        implicitWidth: pillText.implicitWidth + 12
+                        color: va.pill.fill
+                        PC3.Label {
+                            id: pillText
+                            anchors.centerIn: parent
+                            text: va.pill.text
+                            color: va.pill.fg
+                            font.pixelSize: 10
+                            font.bold: true
+                            font.letterSpacing: 0.8
+                        }
+                    }
+                }
+
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: Kirigami.Units.smallSpacing
+                    rowSpacing: 2
+                    PC3.Label {
+                        text: "VPN GATEWAY"
+                        color: va.cMuted
+                        font.pixelSize: 12
+                    }
+                    PC3.Label {
+                        Layout.alignment: Qt.AlignRight
+                        text: brain.state === "alert" ? "DOWN" : (brain.state === "starting" ? "CHECKING" : "REACHABLE")
+                        color: brain.state === "alert" ? "#FF7B72" : (brain.state === "on" ? "#3FB950" : va.cMuted)
+                        font.pixelSize: 10
+                        font.bold: true
+                    }
+                    PC3.Label {
+                        Layout.columnSpan: 2
+                        text: brain.relayIP
+                        color: va.cText
+                        font.family: "monospace"
+                        font.pixelSize: 13
+                        font.bold: true
+                    }
+                    PC3.Label {
+                        text: "ISP GATEWAY"
+                        color: va.cMuted
+                        font.pixelSize: 12
+                        Layout.topMargin: Kirigami.Units.smallSpacing
+                    }
+                    PC3.Label {
+                        Layout.alignment: Qt.AlignRight
+                        Layout.topMargin: Kirigami.Units.smallSpacing
+                        text: "DEFAULT"
+                        color: va.cMuted
+                        font.pixelSize: 10
+                        font.bold: true
+                    }
+                    PC3.Label {
+                        Layout.columnSpan: 2
+                        text: brain.ispGateway
+                        color: va.cText
+                        font.family: "monospace"
+                        font.pixelSize: 13
+                        font.bold: true
+                    }
                 }
             }
         }
-    }
-
-    PC3.Button {
-        Layout.fillWidth: true
-        text: brain.svcActive ? "Stop tunnel" : "Start tunnel"
-        font.pointSize: Kirigami.Theme.defaultFont.pointSize + 1
-        onClicked: brain.pressPower()
     }
 }

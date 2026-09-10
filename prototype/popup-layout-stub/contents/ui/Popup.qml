@@ -7,7 +7,7 @@ ColumnLayout {
     id: popup
     property var brain
 
-    Layout.preferredWidth: Kirigami.Units.gridUnit * 19
+    Layout.preferredWidth: brain.variant === "A" ? 340 : Kirigami.Units.gridUnit * 19
     Layout.preferredHeight: implicitHeight + Kirigami.Units.largeSpacing
     spacing: Kirigami.Units.smallSpacing
 
