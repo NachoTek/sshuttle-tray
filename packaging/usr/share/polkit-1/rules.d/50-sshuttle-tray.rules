@@ -1,0 +1,25 @@
+// sshuttle-tray polkit rules — one file, two blocks (ADR 0003).
+//   * start/stop of the Tunnel: passwordless for active local sessions
+//     (the Tool drives it per click)
+//   * start of the apply unit: one admin password per Route Set change
+// A same-named file in /etc/polkit-1/rules.d/ outranks this one.
+
+polkit.addRule(function(action, subject) {
+    if (action.id !== "org.freedesktop.systemd1.manage-units")
+        return polkit.Result.NOT_HANDLED;
+
+    var unit = action.lookup("unit");
+    var verb = action.lookup("verb");
+
+    if (unit === "sshuttle-tray-tunnel.service"
+        && (verb === "start" || verb === "stop")
+        && subject.local && subject.active) {
+        return polkit.Result.YES;
+    }
+
+    if (/^sshuttle-tray-apply@\d+\.service$/.test(unit || "") && verb === "start") {
+        return polkit.Result.AUTH_ADMIN;
+    }
+
+    return polkit.Result.NOT_HANDLED;
+});

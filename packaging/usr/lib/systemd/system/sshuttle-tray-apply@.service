@@ -1,0 +1,15 @@
+[Unit]
+Description=sshuttle-tray Route Set apply (uid %i)
+Documentation=https://github.com/NachoTek/sshuttle-tray
+
+[Service]
+Type=oneshot
+# Reads the file the Tool staged under the calling user's runtime directory,
+# validates it, and installs it atomically. Never restarts the Tunnel; the
+# popup offers "restart to apply" through the passwordless control path.
+ExecStart=/usr/lib/sshuttle-tray/apply-route-set.sh /run/user/%i/sshuttle-tray/route-set.env /etc/sshuttle-tray/route-set.env
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/etc/sshuttle-tray

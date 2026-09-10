@@ -1,0 +1,23 @@
+[Unit]
+Description=sshuttle tunnel (managed by sshuttle-tray)
+Documentation=https://github.com/NachoTek/sshuttle-tray
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+# Fresh-install fallback: full tunnel when route-set.env is absent.
+Environment=SSHUTTLE_SUBNETS=0/0
+# Static install-time settings (required — a missing file fails the unit fast):
+# SSHUTTLE_REMOTE, SSHUTTLE_REMOTE_SHELL
+EnvironmentFile=/etc/sshuttle-tray/tunnel.env
+# Route Set, written by the apply unit or by hand (optional; overrides the fallback)
+EnvironmentFile=-/etc/sshuttle-tray/route-set.env
+# $SSHUTTLE_SUBNETS unbraced on purpose: systemd word-splits it into one argv per CIDR.
+ExecStart=/usr/bin/sshuttle --verbose --remote ${SSHUTTLE_REMOTE} --ssh-cmd ${SSHUTTLE_REMOTE_SHELL} $SSHUTTLE_SUBNETS
+# Generous start timeout: sshuttle notifies once the firewall rules are up;
+# slow relays and roaming handshakes need the slack.
+TimeoutStartSec=90s
+# Lifecycle: the Tool owns it, the unit never auto-restarts — ships as a
+# /usr/lib drop-in (50-sshuttle-tray-no-restart.conf); a same-named /etc
+# drop-in outranks it if you want auto-restart back.

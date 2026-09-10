@@ -1,0 +1,10 @@
+{
+  "name": "sshuttle-tray",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KDE Plasma 6 tray tool for the sshuttle tunnel; tests only — the shipped artifact is the packaging/ tree",
+  "scripts": {
+    "test": "node --test tests/"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,23 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "NachoTek",
+                "Email": "https://github.com/NachoTek/sshuttle-tray"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Start, stop, and truth-check the sshuttle tunnel from the tray",
+        "Icon": "network-vpn",
+        "Id": "io.github.nachotek.sshuttle-tray",
+        "License": "MIT",
+        "Name": "sshuttle-tray",
+        "Version": "1.0.0",
+        "Website": "https://github.com/NachoTek/sshuttle-tray",
+        "EnabledByDefault": true
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-NotificationArea": "true",
+    "X-Plasma-NotificationAreaCategory": "SystemServices"
+}

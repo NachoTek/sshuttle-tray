@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+                          http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile name=""/>
+    <group name="General">
+        <entry name="echoIntervalSeconds" type="Int">
+            <label>Seconds between echo samples while the popup is open</label>
+            <default>5</default>
+        </entry>
+        <entry name="sampleCap" type="Int">
+            <label>Maximum echo samples per popup-open attention window</label>
+            <default>12</default>
+        </entry>
+        <entry name="backgroundIntervalSeconds" type="Int">
+            <label>Seconds between echo samples while the popup is closed and the Tunnel is active</label>
+            <default>60</default>
+        </entry>
+        <entry name="routeSetDesired" type="String">
+            <label>Desired Route Set (space- or newline-separated IPv4 CIDRs, 0/0 allowed)</label>
+            <default></default>
+        </entry>
+        <entry name="pingTargetDesired" type="String">
+            <label>Desired Ping Target host inside the Route Set (optional)</label>
+            <default></default>
+        </entry>
+    </group>
+</kcfg>
