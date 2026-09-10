@@ -54,7 +54,7 @@ the extracted tree (`sudo cp -a` preserves the executable bit on the helper):
 Or as one shot:
 
 ```sh
-sudo cp -a packaging/usr /usr
+sudo cp -a packaging/usr/. /usr/
 sudo mkdir -p /etc/sshuttle-tray
 sudo cp -a packaging/etc/sshuttle-tray/tunnel.env.example /etc/sshuttle-tray/tunnel.env
 sudo cp -a packaging/etc/sshuttle-tray/route-set.env.example /etc/sshuttle-tray/route-set.env
