@@ -149,6 +149,8 @@ Gateway different from the captured Baseline).
 | Symptom | Likely cause |
 |---|---|
 | `Failed to find '<word>' in path …` | `SSHUTTLE_REMOTE_SHELL` isn't a real ssh binary on this machine (e.g. `cmd`) — set it to `ssh` |
+| ssh falls through to a password prompt; `ssh -vvv` shows only default identities and **no `Offering public key` line** | root's `/root/.ssh/config` is missing or its `Host` pattern doesn't match the address you connect to, so the custom-named key is never offered — recreate the step 2 config and check the `Host` line matches `SSHUTTLE_REMOTE` exactly |
 | Unit fails, journal shows `Permission denied (publickey)` | key not deployed for the account you connect as, wrong file/ACL on the relay, or root's config doesn't pick the key (`IdentityFile`/`IdentitiesOnly`) |
+| Key deploys but is refused from an *admin* account on a domain-joined Windows relay | AD-nested group membership can fail the sshd `Match Group administrators` check — put the key in the user-profile `authorized_keys` as well, and make sure the file isn't UTF-16 (`Format-Hex`, no `FF FE` lead-in) |
 | First start hangs then fails, journal mentions host key | host key never accepted for root — run the step 4 command once |
 | Key auth OK but Tunnel fails with a python error | relay has no `python3` in PATH (Linux), or Windows default-shell quoting (see above) |
