@@ -7,11 +7,11 @@ Rectangle {
     id: va
     property var brain
 
-    radius: Kirigami.Units.largeSpacing
+    radius: 16
     color: "#161B22"
     border.color: "#21262D"
     border.width: 1
-    implicitHeight: content.implicitHeight + Kirigami.Units.largeSpacing * 2
+    implicitHeight: content.implicitHeight + 40
     Layout.fillWidth: true
 
     readonly property color cText: "#F0F6FC"
@@ -32,28 +32,28 @@ Rectangle {
     }
     readonly property string headline: {
         if (brain.state === "on") return "ON"
-        if (brain.state === "starting") return "CONNECTING"
+        if (brain.state === "starting") return "STARTING"
         if (brain.state === "alert") return "ALERT"
         return "OFF"
     }
     readonly property string caption: {
-        if (brain.state === "on") return "Traffic routed through the tunnel"
-        if (brain.state === "off") return "Tunnel is off — click the ring to start"
+        if (brain.state === "on") return "Routed traffic travels through the tunnel"
+        if (brain.state === "off") return "Tunnel is off — use the power button above"
         return brain.stateCause
     }
     readonly property var pill: {
         if (brain.noAnswer) return { text: "NO ANSWER", fill: Qt.rgba(110/255,118/255,129/255,0.15), fg: "#8B949E" }
         if (brain.stale) return { text: "STALE", fill: Qt.rgba(219/255,171/255,10/255,0.15), fg: "#F2CC60" }
-        if (brain.state === "on") return { text: "PROTECTED", fill: Qt.rgba(46/255,160/255,67/255,0.15), fg: "#3FB950" }
+        if (brain.state === "on") return { text: "ENCRYPTED", fill: Qt.rgba(46/255,160/255,67/255,0.15), fg: "#3FB950" }
         if (brain.state === "starting") return { text: "ESTABLISHING", fill: Qt.rgba(219/255,171/255,10/255,0.15), fg: "#F2CC60" }
         if (brain.state === "alert") return { text: "DEGRADED", fill: Qt.rgba(248/255,81/255,73/255,0.15), fg: "#FF7B72" }
-        return { text: "UNPROTECTED", fill: Qt.rgba(110/255,118/255,129/255,0.15), fg: "#8B949E" }
+        return { text: "UNENCRYPTED", fill: Qt.rgba(110/255,118/255,129/255,0.15), fg: "#8B949E" }
     }
 
     ColumnLayout {
         id: content
         anchors.fill: parent
-        anchors.margins: Kirigami.Units.largeSpacing
+        anchors.margins: 20
         spacing: Kirigami.Units.largeSpacing
 
         RowLayout {
@@ -66,6 +66,15 @@ Rectangle {
             }
             Item { Layout.fillWidth: true }
             PC3.ToolButton {
+                implicitWidth: 22
+                implicitHeight: 22
+                icon.name: "system-shutdown"
+                icon.color: brain.svcActive ? "#F85149" : "#3FB950"
+                PC3.ToolTip.text: brain.svcActive ? "Stop the tunnel" : "Start the tunnel"
+                PC3.ToolTip.visible: hovered
+                onClicked: brain.pressPower()
+            }
+            PC3.ToolButton {
                 implicitWidth: 20
                 implicitHeight: 20
                 icon.name: "configure"
@@ -76,30 +85,24 @@ Rectangle {
 
         Item {
             Layout.alignment: Qt.AlignHCenter
-            implicitWidth: 84
-            implicitHeight: 84
-            MouseArea {
-                id: ringClick
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: brain.pressPower()
-            }
+            Layout.topMargin: 4
+            implicitWidth: 80
+            implicitHeight: 80
             Rectangle {
                 id: halo
                 anchors.centerIn: parent
-                width: 112
-                height: 112
-                radius: 56
+                width: 108
+                height: 108
+                radius: 54
                 color: va.accent
-                opacity: brain.state === "on" ? 0.18 : 0
+                opacity: brain.state === "on" ? 0.15 : 0
                 Behavior on opacity { NumberAnimation { duration: 300 } }
             }
             Rectangle {
                 id: ring
                 anchors.fill: parent
-                radius: 42
-                color: "transparent"
+                radius: 40
+                color: Qt.rgba(0, 229/255, 1, brain.state === "on" ? 0.06 : 0)
                 border.color: va.accent
                 border.width: 3
                 SequentialAnimation on opacity {
@@ -120,11 +123,12 @@ Rectangle {
 
         PC3.Label {
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 8
             text: va.headline
             color: va.accent
             font.pixelSize: 24
-            font.bold: true
-            font.letterSpacing: 1.2
+            font.weight: Font.Black
+            font.letterSpacing: 1.4
         }
 
         PC3.Label {
@@ -134,40 +138,42 @@ Rectangle {
             wrapMode: Text.Wrap
             text: va.caption
             color: va.cMuted
-            font.pixelSize: 13
+            font.pixelSize: 12
         }
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: card.implicitHeight + Kirigami.Units.largeSpacing * 2
-            radius: Kirigami.Units.smallSpacing + 2
+            Layout.topMargin: 8
+            implicitHeight: card.implicitHeight + 28
+            radius: 12
             color: va.cCard
             border.color: va.cBorder
             border.width: 1
             ColumnLayout {
                 id: card
                 anchors.fill: parent
-                anchors.margins: Kirigami.Units.largeSpacing
-                spacing: Kirigami.Units.smallSpacing
+                anchors.margins: 14
+                spacing: 10
 
                 RowLayout {
                     Layout.fillWidth: true
                     PC3.Label {
-                        text: "GATEWAY ROUTING"
+                        text: "CURRENT NETWORK"
                         color: va.cMuted
-                        font.pixelSize: 12
+                        font.pixelSize: 11
                         font.bold: true
                         font.letterSpacing: 1
                     }
                     Item { Layout.fillWidth: true }
-                    Rectangle {
-                        radius: height / 2
-                        implicitHeight: pillText.implicitHeight + 6
-                        implicitWidth: pillText.implicitWidth + 12
-                        color: va.pill.fill
+                    RowLayout {
+                        spacing: 5
+                        Rectangle {
+                            implicitWidth: 6
+                            implicitHeight: 6
+                            radius: 3
+                            color: va.pill.fg
+                        }
                         PC3.Label {
-                            id: pillText
-                            anchors.centerIn: parent
                             text: va.pill.text
                             color: va.pill.fg
                             font.pixelSize: 10
@@ -177,52 +183,80 @@ Rectangle {
                     }
                 }
 
-                GridLayout {
+                Rectangle {
                     Layout.fillWidth: true
-                    columns: 2
-                    columnSpacing: Kirigami.Units.smallSpacing
-                    rowSpacing: 2
+                    implicitHeight: 1
+                    color: va.cBorder
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
                     PC3.Label {
-                        text: "VPN GATEWAY"
+                        text: "LOCAL GATEWAY"
                         color: va.cMuted
-                        font.pixelSize: 12
+                        font.pixelSize: 11
                     }
-                    PC3.Label {
-                        Layout.alignment: Qt.AlignRight
-                        text: brain.state === "alert" ? "DOWN" : (brain.state === "starting" ? "CHECKING" : "REACHABLE")
-                        color: brain.state === "alert" ? "#FF7B72" : (brain.state === "on" ? "#3FB950" : va.cMuted)
-                        font.pixelSize: 10
-                        font.bold: true
+                    Item { Layout.fillWidth: true }
+                    RowLayout {
+                        spacing: 6
+                        PC3.Label {
+                            text: brain.ispGateway
+                            color: va.cMuted
+                            font.family: "monospace"
+                            font.pixelSize: 12
+                        }
+                        Rectangle {
+                            radius: 4
+                            implicitHeight: localChip.implicitHeight + 4
+                            implicitWidth: localChip.implicitWidth + 8
+                            color: brain.state === "on" ? Qt.rgba(0, 229/255, 1, 0.12) : "#21262D"
+                            PC3.Label {
+                                id: localChip
+                                anchors.centerIn: parent
+                                text: brain.state === "on" ? "DIRECT" : "DEFAULT"
+                                color: brain.state === "on" ? "#00E5FF" : va.cMuted
+                                font.pixelSize: 9
+                                font.bold: true
+                            }
+                        }
                     }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
                     PC3.Label {
-                        Layout.columnSpan: 2
-                        text: brain.relayIP
-                        color: va.cText
-                        font.family: "monospace"
-                        font.pixelSize: 13
-                        font.bold: true
-                    }
-                    PC3.Label {
-                        text: "ISP GATEWAY"
+                        text: "REMOTE GATEWAY"
                         color: va.cMuted
-                        font.pixelSize: 12
-                        Layout.topMargin: Kirigami.Units.smallSpacing
+                        font.pixelSize: 11
                     }
-                    PC3.Label {
-                        Layout.alignment: Qt.AlignRight
-                        Layout.topMargin: Kirigami.Units.smallSpacing
-                        text: "DEFAULT"
-                        color: va.cMuted
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-                    PC3.Label {
-                        Layout.columnSpan: 2
-                        text: brain.ispGateway
-                        color: va.cText
-                        font.family: "monospace"
-                        font.pixelSize: 13
-                        font.bold: true
+                    Item { Layout.fillWidth: true }
+                    RowLayout {
+                        spacing: 6
+                        PC3.Label {
+                            text: brain.relayIP
+                            color: va.cText
+                            font.family: "monospace"
+                            font.pixelSize: 12
+                            font.bold: true
+                        }
+                        Rectangle {
+                            radius: 4
+                            implicitHeight: remoteChip.implicitHeight + 4
+                            implicitWidth: remoteChip.implicitWidth + 8
+                            color: {
+                                if (brain.state === "on") return Qt.rgba(0, 229/255, 1, 0.12)
+                                if (brain.state === "alert") return Qt.rgba(248/255,81/255,73/255,0.15)
+                                return "#21262D"
+                            }
+                            PC3.Label {
+                                id: remoteChip
+                                anchors.centerIn: parent
+                                text: brain.state === "on" ? "ACTIVE" : (brain.state === "alert" ? "DOWN" : "OFF")
+                                color: brain.state === "on" ? "#00E5FF" : (brain.state === "alert" ? "#FF7B72" : va.cMuted)
+                                font.pixelSize: 9
+                                font.bold: true
+                            }
+                        }
                     }
                 }
             }

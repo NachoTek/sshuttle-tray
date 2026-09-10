@@ -51,8 +51,8 @@ PlasmoidItem {
     readonly property var variantNames: ["Status hero", "Switch-first terminal", "Dense rows"]
     property bool liveControl: false
 
-    property string relayIP: "office-tunnel · 192.0.2.106"
-    property string ispGateway: "192.0.2.1"
+    property string relayIP: "office-tunnel"
+    property string ispGateway: "192.0.2.254"
 
     readonly property string simHomeIP: "192.0.2.10"
     readonly property string simTunnelIP: "198.51.100.20"
