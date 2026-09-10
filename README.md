@@ -84,6 +84,11 @@ SSHUTTLE_REMOTE=relay.example     # the sshuttle -r: SSH alias or user@host[:por
 SSHUTTLE_REMOTE_SHELL=ssh         # one word: the --ssh-cmd sshuttle runs
 ```
 
+The unit's ssh runs as root and non-interactively, so the relay must accept
+root's SSH key — see [`docs/key-auth.md`](docs/key-auth.md) for the full
+walkthrough (dedicated key, deploy on a Linux or Windows relay,
+non-interactive verification).
+
 **`/etc/sshuttle-tray/route-set.env`** (optional; the settings dialog
 installs it through the root apply unit with exactly one password prompt per
 change; hand edits are equally valid and apply on the next Tunnel start):
